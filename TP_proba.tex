@@ -1,0 +1,198 @@
+\documentclass[a4paper]{report}	
+
+% Chargement d'extensions
+\usepackage[utf8]{inputenc}     % Pour utiliser les lettres accentuées
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{cases}
+\usepackage{mathrsfs}
+\usepackage [francais]{babel}     % Pour la langue française
+\usepackage{graphicx}	%pour l'insertion de figures 
+\usepackage{verbatim}		%pour le texte brut 
+\usepackage{moreverb}		%text brut avec tab
+\usepackage{listings} %aussi pour texte brut
+\usepackage{color}
+\usepackage{subfigure} %pour des dous-figures
+\usepackage{multicol}
+\usepackage{geometry}
+\geometry{margin=1in} % for example, change the margins to 1 inches all round
+
+\addto\captionsfrench{\renewcommand{\chaptername}{Partie}}
+
+% Informations le titre, le(s) auteur (s), la date
+\title {TP - Estimation de durées de vie censurées}
+\author {Brendan LE LAIN}
+\date{\today}
+
+% Début du document
+\begin {document}
+ 
+\pagestyle{headings}
+ 
+\maketitle
+ 
+\chapter {Introduction}
+
+On se propose d'étudier la durée de vie d'un matériel. On teste ainsi $n$ matériels identiques et leur durée de vie est modélisée par $n$ variables aléatoires $X_i$ $(1 \le i \le n)$, que l'on supposent indépendantes et indentiquement distribuées. En fixant un temps de censure $c > 0$, on observe des réalisations $T_i = \min (X_i,c)$.
+
+On suppose de plus que les durées de vie suivent une loi de Zeibull de paramètre de forme $\beta >0$ et de paramètre d'échelle $\eta >0$
+
+L'objectif du TP est de mettre en oeuvre deux méthodes : celle du maximum de vraisemblance et la méthode SEM pour l'estimation des deux paramètres $\beta$ et $\eta$ à partir de données censurées.
+
+\subsubsection{1.}
+
+Jetons dans un premier temps un oeil sur les caractéristiques de la loi de Weibull.
+
+Sa densité s'écrit : 
+\[f_{\beta,\eta}(x)=\frac{\beta}{\eta} \left(\frac{x}{\eta}\right)^{\beta-1} \exp\left(-\left(\frac{x}{\eta}\right)^{\beta}\right)\]
+
+La fonction de fiabilité $G_{\beta,\eta}$ est donnée, pour $x>0$, par :
+\[G_{\beta,\eta}(x)=1-F_{\beta,\eta}(x)=\exp\left(-\left(\frac{x}{\eta}\right)^{\beta}\right)\]
+
+ Ceci nous permet de calculer le taux de défaillance : 
+ \[\lambda_{\beta,\eta}(x)=\frac{f_{\beta,\eta}(x)}{G_{\beta,\eta}(x)}=\frac{\beta}{\eta} \left(\frac{x}{\eta}\right)^{\beta-1}\]
+ 
+ On voit alors immédiatement que :
+ 
+ $\triangleright \; $ si $\beta=1$, $\lambda_{1,\eta}(x)=\frac{1}{\eta}$ et le taux de panne est constant, ce qui ce comprend puisqu'alors les $X_i$ suivent une loi exponentielle de paramètre $1/\eta$.
+ 
+ $\triangleright \; $ si $\beta<1$, le taux de panne décroit.
+ 
+  $\triangleright \; $ si $\beta>1$, le taux de panne croit.
+  
+  \subsubsection{2.}
+  Notons $M$ le nombre de défaillances effectivement observées. Cette variable aléatoire suit donc une loi binomiale de paramètres $n$ et $p$, où $p$ est la probabilité d'obersver une défaillance, c'est-à-dire $p=\mathbb{P}(X_i<c)=1-G_{\beta,\eta}(c)$. Schématiquement, on a donc $M \sim \mathcal{B}(n,1-G_{\beta,\eta}(c))$.
+  
+  On peut alors calculer simplement l'espérance de cette loi :
+  \[\mathbb{E}(M)=n(1-G_{\beta,\eta}(c))\]
+  
+  
+  \chapter {Maximum de vraisemblance}
+  
+    \subsubsection{Analytiquement}
+    
+    On s'intéresse à présent à la première méthode que nous souhaitons mettre en oeuvre : celle du maximum de vraisemblance. Pour cela, il nous faut chercher les estimateurs du maximum de vraisemblance.
+    
+    Pour un échantillon $(t_1,...,t_n)$, la vraisemblance s'écrit :
+    
+    \begin{align*}
+	L(t_1,...,t_n;\beta,\eta) & = \prod_{i:t_i<c} {f_{\beta,\eta}(t_i)}  \prod_{i:t_i=c} {G_{\beta,\eta}(t_i)} \\
+	& =  \prod_{i:t_i<c}{\frac{\beta}{\eta} \left(\frac{t_i}{\eta}\right)^{\beta-1}\exp\left(-\left(\frac{x}{\eta}\right)^{\beta}\right) }  \prod_{i:t_i=c} {\exp\left(-\left(\frac{t_i}{\eta}\right)^{\beta}\right)}\\
+	& = \prod_{i:t_i<c}{\frac{\beta}{\eta} \left(\frac{t_i}{\eta}\right)^{\beta-1} }  \prod_{i=1}^{n} {\exp\left(-\left(\frac{t_i}{\eta}\right)^{\beta}\right)}
+	\end{align*}
+	
+	D'où :
+	\begin{align*}
+	\log L(t_1,...,t_n;\beta,\eta) & = m \log \beta - m\log \eta + (\beta-1)\sum_{i:t_i<c}{\log t_i} - m(\beta-1)\log \eta - \frac{1}{\eta^\beta} \sum_{i=1}^{n} {t_i^\beta}
+     \end{align*}
+     
+     On obtient les équations de vraisemblance :
+     \begin{align}
+     	\begin{cases}
+		\frac{\partial \log L(t_1,...,t_n;\beta,\eta)}{\partial \eta} & = 0 \nonumber\\
+	 	\frac{\partial \log L(t_1,...,t_n;\beta,\eta)}{\partial \beta} & = 0 \nonumber\\
+     	\end{cases}
+     	&\iff 
+      	\begin{cases}
+		\frac{-m}{\eta} - \frac{m(\beta -1)}{\eta} + \frac{\beta \eta^{\beta-1}}		{\eta^{2\beta}} \sum_{i=1}^{n} {t_i^\beta} = 0  \nonumber\\
+	 	\frac{m}{\beta} + \sum_{i:t_i<c}{\log t_i} - m \log \eta + \sum_{i=1}^{n} {\log (\frac{t_i}{\eta}) \frac{t_i^\beta}{\eta^\beta}} = 0  \nonumber\\
+     	\end{cases}
+   	\\
+   	 \nonumber\\
+   	&\iff
+   	\begin{cases}
+     		\frac{-m\beta}{\eta} + \frac{\beta}{\eta^{\beta+1}} \sum_{i=1}^{n} {t_i^\beta} = 0 \nonumber\\
+		\frac{m}{\beta} +  \sum_{i:t_i<c}{\log (t_i)} - m\log \eta + \frac{1}{\eta^{\beta}} \sum_{i=1}^{n} {\log (t_i)} t_i^{\beta} - \log \eta \sum_{i=1}^{n} \frac{t_i^\beta}{\eta^\beta}  = 0 \nonumber\\
+     	\end{cases}
+     	\\
+     	 \nonumber\\
+     	&\iff
+   	\begin{cases}
+     		\eta^{\beta} = \frac{1}{m}  \sum_{i=1}^{n} {t_i^\beta} \label{eqEMV}\\
+		\frac{1}{\beta} + \frac{1}{m} \sum_{i:t_i<c}{\log (t_i)} - \frac{\sum_{i=1}^{n}  {\log (t_i)} t_i^{\beta}}{\sum_{i=1}^{n} {t_i^{\beta}}}  = 0 
+     	\end{cases}
+\end{align}
+
+\subsection{Implémentation}
+
+On peut difficilement résoudre ces équations à la main. On va donc d'abord résoudre numériquement l'équation en $\beta$, pour ensuite obtenir $\eta$.
+
+On présente ci-dessous le code \verb|R| correspondant. On définit dans un premier temps une fonction \verb|f_beta| qui n'est autre que la fonction pour laquelle on souhaite obtenir la racine. Cette fonction prend en paramètres, en plus de la variable $\beta$, l'échantillon observé censuré $t$, la censure $c$, ainsi que le nombre $m$ de défaillances.
+
+ On peut alors définir la fonction \verb|EMV| qui prend en paramètres l'échantillon $t$ ainsi que la censure $c$. Cette fonction calcule par \verb|uniroot| la racine de notre fonction \verb|f_beta|, on obtient ainsi $\hat{\beta}$ l'estimateur du maximum de vraisemblance pour $\beta$. Celui pour $\eta$ est obtenu en remplaçant $\beta$ par $\hat{\beta}$ dans l'équation (\ref{eqEMV}). 
+
+\lstset{ language=Scilab, frame=single, xrightmargin =1 cm , xleftmargin =1 cm, morekeywords={uniroot}}
+\lstinputlisting[firstline=26, lastline=38]{./TP.R}
+     
+\subsection{Test}
+
+Pour s'assurer que notre implémentation fonctionne, on peut tester le code précédent pour retrouver numériquement quelques résultats théoriques du maximum de vraisemblance.     
+    
+\subsubsection{Convergence}
+
+Le premier est bien sûr la convergence. On vérifie graphiquement que $\hat{\beta}$ et $\hat{\eta}$ obtenus tendent respectivement vers $\beta$ et $\eta$ avec $n$, taille de l'échantillon. (Le code \verb|R| est en annexe).
+
+ \begin{figure}[!ht]
+	\centering
+     	\includegraphics[scale=0.5]{Rplot.png}
+
+	\caption{En rouge, on a tracé les vraies valeurs de $\beta$ (à gauche) et $\eta$ (à droite)}
+\end{figure}
+
+\subsubsection{Normalité asymptotique}
+
+Une autre propriété de l'estimateur du maximum de vraisemblance est qu'il est asymptotiquement normal. Pour le visualiser, on prend une taille d'échantillon $n$ assez grande et on répète $k$ fois la simulation d'une réalisation d'une loi de Weibull censurée sur laquelle on calcule une estimation du maximum de vraisemblance pour $\beta$ et $\eta$. On trace alors l'histogramme des $\beta_k$ et $\eta_k$ obtenus. 
+
+\begin{figure}[!ht]
+	\centering
+     	\includegraphics[scale=0.5]{Rplot2.png}
+
+	\caption{On a choisit $n=500$ et $k=1000$. Cela ressemble bien à une densité normale.}
+\end{figure}
+
+\subsubsection{Mise à l'épreuve sur notre problème}
+
+Nous pouvons désormais tester la méthode du maximum de vraisemblance sur notre problème et examiner ses qualités, à savoir notamment le biais et la variance de l'estimateur. Nous résumons ci-dessous les résultats pour ces différents tests pour lesquels on simule à chaque fois 50 échantillons avec $\beta=2$, $\eta=100$ et une taille d'échantillon $n=25$. On s'intéresse à l'influence de la censure sur les qualités de l'estimation.
+
+\begin{center}
+\begin{tabular}{|c||c|c||c|c|}
+	\hline
+	\bf Censure &  $\mathbb{E}(\hat{\beta})$  &  $Var(\hat{\beta})$ &  $\mathbb{E}(\hat{\eta})$ &  $Var(\hat{\eta})$ \\
+	\hline
+	\bf 40 &2.66 & 2.41 & 137.08 &16627.64 \\
+	\hline
+	\bf 60 &2.19 & 0.69 & 108.19 & 1074.97\\
+	\hline
+	\bf 80 &1.99 & 0.28 &109.02 &1706.83 \\
+	\hline
+	\bf 100 &2.25 &0.32  & 99.90&  127.20\\
+	\hline
+\end{tabular}
+\end{center}
+
+On peut observer que la variance augmente fortement lorsque les données sont fortement censurés (de l'ordre de 40).
+
+Cela nous incline à chercher une autre méthode prenant mieux en compte le manque d'information. 
+
+  \chapter {Méthode SEM}
+
+
+
+
+  
+  
+  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+
+\end{document}
