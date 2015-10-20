@@ -26,6 +26,8 @@
 \author {Brendan LE LAIN}
 \date{\today}
 
+\newtheorem{theorem}{Théorème}
+
 % Début du document
 \begin {document}
  
@@ -71,7 +73,7 @@ La fonction de fiabilité $G_{\beta,\eta}$ est donnée, pour $x>0$, par :
   
   \chapter {Maximum de vraisemblance}
   
-    \subsubsection{Analytiquement}
+    \section{Analytiquement}
     
     On s'intéresse à présent à la première méthode que nous souhaitons mettre en oeuvre : celle du maximum de vraisemblance. Pour cela, il nous faut chercher les estimateurs du maximum de vraisemblance.
     
@@ -115,7 +117,7 @@ La fonction de fiabilité $G_{\beta,\eta}$ est donnée, pour $x>0$, par :
      	\end{cases}
 \end{align}
 
-\subsection{Implémentation}
+\section{Implémentation}
 
 On peut difficilement résoudre ces équations à la main. On va donc d'abord résoudre numériquement l'équation en $\beta$, pour ensuite obtenir $\eta$.
 
@@ -126,11 +128,11 @@ On présente ci-dessous le code \verb|R| correspondant. On définit dans un prem
 \lstset{ language=Scilab, frame=single, xrightmargin =1 cm , xleftmargin =1 cm, morekeywords={uniroot}}
 \lstinputlisting[firstline=26, lastline=38]{./TP.R}
      
-\subsection{Test}
+\section{Test}
 
 Pour s'assurer que notre implémentation fonctionne, on peut tester le code précédent pour retrouver numériquement quelques résultats théoriques du maximum de vraisemblance.     
     
-\subsubsection{Convergence}
+\subsection{Convergence}
 
 Le premier est bien sûr la convergence. On vérifie graphiquement que $\hat{\beta}$ et $\hat{\eta}$ obtenus tendent respectivement vers $\beta$ et $\eta$ avec $n$, taille de l'échantillon. (Le code \verb|R| est en annexe).
 
@@ -141,7 +143,7 @@ Le premier est bien sûr la convergence. On vérifie graphiquement que $\hat{\be
 	\caption{En rouge, on a tracé les vraies valeurs de $\beta$ (à gauche) et $\eta$ (à droite)}
 \end{figure}
 
-\subsubsection{Normalité asymptotique}
+\subsection{Normalité asymptotique}
 
 Une autre propriété de l'estimateur du maximum de vraisemblance est qu'il est asymptotiquement normal. Pour le visualiser, on prend une taille d'échantillon $n$ assez grande et on répète $k$ fois la simulation d'une réalisation d'une loi de Weibull censurée sur laquelle on calcule une estimation du maximum de vraisemblance pour $\beta$ et $\eta$. On trace alors l'histogramme des $\beta_k$ et $\eta_k$ obtenus. 
 
@@ -152,7 +154,7 @@ Une autre propriété de l'estimateur du maximum de vraisemblance est qu'il est 
 	\caption{On a choisit $n=500$ et $k=1000$. Cela ressemble bien à une densité normale.}
 \end{figure}
 
-\subsubsection{Mise à l'épreuve sur notre problème}
+\subsection{Mise à l'épreuve sur notre problème}
 
 Nous pouvons désormais tester la méthode du maximum de vraisemblance sur notre problème et examiner ses qualités, à savoir notamment le biais et la variance de l'estimateur. Nous résumons ci-dessous les résultats pour ces différents tests pour lesquels on simule à chaque fois 50 échantillons avec $\beta=2$, $\eta=100$ et une taille d'échantillon $n=25$. On s'intéresse à l'influence de la censure sur les qualités de l'estimation.
 
@@ -177,6 +179,35 @@ On peut observer que la variance augmente fortement lorsque les données sont fo
 Cela nous incline à chercher une autre méthode prenant mieux en compte le manque d'information. 
 
   \chapter {Méthode SEM}
+  
+  \section{Analytiquement}
+  
+  L'idée est de palier au manque d'information lié à la censure en simulant ces données manquantes, sachant que la défaillance à lieu après la censure. Partant de paramètres $\beta_0$ et $\eta_0$ arbitraires, nous simulerons les données manquantes suivant une loi de Weibull de paramètres $(\beta_0,\eta_0)$ conditionnée par l'évènement ${X_i >c}$. Sur ces données complétées, nous pouvons calculer une estimation $(\beta_1,\eta_1)$ des paramètres par la méthode du maximum de vraisemblance. On répète ceci $k$ fois. On peut montrer que la suite $(\beta_k, \eta_k)$ tend avec $n$ (et non avec $k$, ce serait trop beau...) vers les vrais paramètres $(\beta,\eta)$.
+  
+  Le premier problème qui se pose ici est donc celui de la simulation des données manquantes. Pour cela on utilise la méthode de la fonction inverse, qui se base sur le théorème suivant : 
+  
+ \begin{theorem}
+Soit $F$ la fonction de répartition continue d'une variable aléatoire réelle $X$. 
+
+On a $F(X) \sim \mathcal{U}_{[0,1]}$
+\end{theorem}
+  
+ On en déduit immédiatement que $F^{-1}(U)$ a la même loi que X, où $U\sim\mathcal{U}_{[0,1]}$. 
+ 
+ On veut simuler des données qui suivent une loi de Weibull de paramètres $(\beta_0,\eta_0)$ conditionnée par ${X_i >c}$. Cela donne une fonction de répartition $F$ de la forme :
+ 
+ \begin{align*}
+ F(x) & =  \mathbb{P} 
+ 
+ 
+  
+  
+  
+  
+  
+  
+  
+  
 
 
 
