@@ -73,7 +73,7 @@ La fonction de fiabilité $G_{\beta,\eta}$ est donnée, pour $x>0$, par :
   
   \chapter {Maximum de vraisemblance}
   
-    \section{Analytiquement}
+    \section{Analytiquement \label{sec:calculEMV}}
     
     On s'intéresse à présent à la première méthode que nous souhaitons mettre en oeuvre : celle du maximum de vraisemblance. Pour cela, il nous faut chercher les estimateurs du maximum de vraisemblance.
     
@@ -81,7 +81,7 @@ La fonction de fiabilité $G_{\beta,\eta}$ est donnée, pour $x>0$, par :
     
     \begin{align*}
 	L(t_1,...,t_n;\beta,\eta) & = \prod_{i:t_i<c} {f_{\beta,\eta}(t_i)}  \prod_{i:t_i=c} {G_{\beta,\eta}(t_i)} \\
-	& =  \prod_{i:t_i<c}{\frac{\beta}{\eta} \left(\frac{t_i}{\eta}\right)^{\beta-1}\exp\left(-\left(\frac{x}{\eta}\right)^{\beta}\right) }  \prod_{i:t_i=c} {\exp\left(-\left(\frac{t_i}{\eta}\right)^{\beta}\right)}\\
+	& =  \prod_{i:t_i<c}{\frac{\beta}{\eta} \left(\frac{t_i}{\eta}\right)^{\beta-1}\exp\left(-\left(\frac{t_i}{\eta}\right)^{\beta}\right) }  \prod_{i:t_i=c} {\exp\left(-\left(\frac{t_i}{\eta}\right)^{\beta}\right)}\\
 	& = \prod_{i:t_i<c}{\frac{\beta}{\eta} \left(\frac{t_i}{\eta}\right)^{\beta-1} }  \prod_{i=1}^{n} {\exp\left(-\left(\frac{t_i}{\eta}\right)^{\beta}\right)}
 	\end{align*}
 	
@@ -184,6 +184,8 @@ Cela nous incline à chercher une autre méthode prenant mieux en compte le manq
   
   L'idée est de palier au manque d'information lié à la censure en simulant ces données manquantes, sachant que la défaillance à lieu après la censure. Partant de paramètres $\beta_0$ et $\eta_0$ arbitraires, nous simulerons les données manquantes suivant une loi de Weibull de paramètres $(\beta_0,\eta_0)$ conditionnée par l'évènement ${X_i >c}$. Sur ces données complétées, nous pouvons calculer une estimation $(\beta_1,\eta_1)$ des paramètres par la méthode du maximum de vraisemblance. On répète ceci $k$ fois. On peut montrer que la suite $(\beta_k, \eta_k)$ tend avec $n$ (et non avec $k$, ce serait trop beau...) vers les vrais paramètres $(\beta,\eta)$.
   
+  \subsection{Simulation}
+  
   Le premier problème qui se pose ici est donc celui de la simulation des données manquantes. Pour cela on utilise la méthode de la fonction inverse, qui se base sur le théorème suivant : 
   
  \begin{theorem}
@@ -194,13 +196,90 @@ On a $F(X) \sim \mathcal{U}_{[0,1]}$
   
  On en déduit immédiatement que $F^{-1}(U)$ a la même loi que X, où $U\sim\mathcal{U}_{[0,1]}$. 
  
- On veut simuler des données qui suivent une loi de Weibull de paramètres $(\beta_0,\eta_0)$ conditionnée par ${X_i >c}$. Cela donne une fonction de répartition $F$ de la forme :
+Dans notre cas, on souhaite simuler des données qui suivent une loi de Weibull de paramètres $(\beta_0,\eta_0)$ conditionnée par ${X>c}$. Cela donne une fonction de répartition $F$ de la forme :
  
  \begin{align*}
- F(x) & =  \mathbb{P} 
+ F(x) & =  \mathbb{P}(X \leq x | X > c) = \frac{\mathbb{P}(c \leq X \leq x)}{\mathbb{P}(X>c)} 
+= \frac{\mathbb{P} (X \leq x) - \mathbb{P}(X<c)}{\mathbb{P}(X>c)} \\
+&= \frac{1-\exp{(-(\frac{x}{\eta})^{\beta})} - 1 + \exp{(-(\frac{c}{\eta})^{\beta}})}{\exp{(-(\frac{c}{\eta})^{\beta}})} \\
+&= 1 - \exp{\left( \frac{-x^{\beta}+c^{\beta}}{\eta^{\beta}} \right)}
+\end{align*}
+
+D'après le théorème précédent, on sait que cette expression suit une loi uniforme sur $[0,1]$.
+Et que l'inverse est précisément la loi de nos données manquantes. 
+Alors, avec $U \sim \mathcal{U}_{[0,1]} $ , on obtient : 
+
+\[
+u = 1 - \exp{\frac{-x^{\beta}+c^{beta}}{\eta^{\beta}}}
+\implies \ln (1-u) = \frac{-x^{\beta}+c^{\beta}}{\eta^{\beta}}
+\implies x = \left( -\eta^{\beta} \ln{(1-u)} + c^{\beta} \right) ^{\frac{1}{\beta}}  
+\]
+
+Ou encore, en remarquant que $U \sim \mathcal{U}_{[0,1]}$ équivaut à $1-U \sim \mathcal{U}_{[0,1]}$ : 
+
+\begin{align*}
+x &= \left( \eta^\beta ( -\ln{(u)} + \frac{c^\beta}{\eta^\beta}) \right) ^{\frac{1}{\beta}}\\
+&= \eta \left(-\ln{(u)} + (\frac{c}{\eta})^\beta \right)^{\frac{1}{\beta}}
+\end{align*}
+
+\subsection{Calcul de l'EMV}
+Le deuxième problème que l'on rencontre est le calcul de l'estimateur de maximum de vraisemblance
+pour ces données non tronquées. Elles suivent une loi de Weibull de paramètres $(\beta,\eta)$. 
+D'où l'expression de la vraisemblance : 
+
+\[
+L(x_1,...,x_n;\beta,\eta)  = \prod_{i=1}^{n} {f_{\beta,\eta}(x_i)} =  \prod_{i=1}^{n}{\frac{\beta}{\eta} \left(\frac{x_i}{\eta}\right)^{\beta-1}\exp\left(-\left(\frac{x_i}{\eta}\right)^{\beta}\right) }
+\]
+
+
+D'où : 
+\begin{align*}
+\log L(x_1,...,x_n;\beta,\eta) &= \sum_{i=1}^{n} \log \left( \frac{\beta}{\eta} \left(\frac{x_i}{\eta}\right)^{\beta-1}\exp\left(-\left(\frac{x_i}{\eta}\right)^{\beta}\right) \right) \\
+&= n \log (\beta) - n \log (\eta) + (\beta -1 ) \sum_{i=1}^{n} \log (x_i) -n (\beta -1) \log (\eta) - \sum_{i=1}^{n} (\frac{x_i}{\eta})^\beta \\
+\end{align*}
+
+En dérivant l'expression précédente par rapport à $\beta$ d'un côté et par rapport à $\eta$ de l'autre et après des calculs ressemblant fort à ceux réalisés au paragraphe (\ref{sec:calculEMV}), on obtient les équations de 
+vraisemblance suivantes : 
  
- 
+\[
+\begin{cases}
+\eta = \left( \frac{1}{n}  \sum_{i=1}^{n} {x_i^\beta} \right)^{\frac{1}{\beta}}\\
+\frac{1}{\beta} + \frac{1}{n} \sum_{i=1}^{n}{\log (x_i)} - \frac{\sum_{i=1}^{n}  {\log (x_i)} x_i^{\beta}}{\sum_{i=1}^{n} {x_i^{\beta}}}  = 0  
+\end{cases}
+\]
+
+Similairement à ce qu'on avait fait plus haut, on obtient les estimateurs $\hat{\beta}$ et $\hat{\eta}$ du maximum de vraisemblance pour les données simulées non tronquées qui forment donc le couple $(\beta_k,\eta_k)$ définit au début de cette section. 
+
+
+\subsection{Critère d'arrêt}
+
+Enfin, il nous reste à voir à quel moment arrêter la construction des $\beta_k$ et $\eta_k$. 
+Une idée est de s'arrêter lorsque la suite s'est stabilisée, c'est-à-dire lorsque $(\beta_{k+1},\eta_{k+1})$ est \emph{proche} de $(\beta_k,\eta_k)$. Le moyen de mesurer cette proximité qui vient à l'esprit est la vraisemblance de l'échantillon de départ. On aura ainsi le critère d'arrêt suivant : 
+
+\[ | L(t_1,...,t_n;\beta_k,\eta_k) - L(t_1,...,t_n;\beta_{k+1},\eta_{k+1} | \leq \epsilon \]
+Pour $\epsilon$ un réel positif donné. En fait on prendra la log-vraisemblance, simplement pour
+avoir des expressions plus simples.
+
+\section{Implémentation}
+
+Nous avons maintenant tout ce qu'il nous faut. Le code implémentant la méthode SEM décrite dans le paragraphe précédent est détaillé ci-dessous.
+
+La fonction \verb|simu| simule \verb|N| valeurs suivant une loi de Weibull de paramètres \verb|beta0| et \verb|eta0|, conditionnée par $X>c$.
+
+\lstinputlisting[firstline=4, lastline=8]{./SEM.R}
+
+Les fonctions \verb|f_beta_SEM| et \verb|EMV_SEM| calcul l'estimateur du maximum de vraisemblance pour les paramètres $(\beta,\eta)$ d'une loi de Weibull non tronquée. 
+\lstinputlisting[firstline=19, lastline=31]{./SEM.R}
+
+La fonction \verb|logVrai| renvoie la valeur de la log-vraisemblance d'un échantillon suivant une loi de Weibull de paramètres \verb|beta| et \verb|eta| censurée à \verb|c|.
+\lstinputlisting[firstline=11, lastline=16]{./SEM.R}
+
+Finalement, la fonction \verb|SEM| calcule les estimateurs de $\beta$ et $\eta$ par la méthode SEM. Elle prend en entrée l'échantillon censuré \verb|t| et la censure \verb|c|, ainsi que des paramètres optionnels permettant de jouer sur les valeurs de $\beta_0, \eta_0$ et $\epsilon$. Par sécurité, l'algorithme s'arrête après \verb|iterMax| itérations (100 par défaut).
+ \lstinputlisting[firstline=33, lastline=56]{./SEM.R}
   
+
+
+ 
   
   
   
