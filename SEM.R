@@ -10,13 +10,13 @@ simu=function(c,eta0,beta0,N)
 #la log-vraisemblance pour l'?chantillon de d?part
 logVrai=function(c,eta,beta,ech)
 {
-  m=length(tVrai[tVrai<c])
-  m*log(beta) - m*log(eta) + (beta-1)*(sum(tVrai[tVrai<c])) 
-           -m*(beta-1)*log(eta) - (sum(tVrai^beta))/(eta^beta)                               
+  m=length(ech[ech<c])
+  m*log(beta) - m*log(eta) + (beta-1)*(sum(ech[ech<c])) 
+           -m*(beta-1)*log(eta) - (sum(ech^beta))/(eta^beta)                               
 }
 
 
-f_beta_SEM=function(b,ech,N)
+fd_beta_SEM=function(b,ech,N)
 {
   1/b + (sum(log(ech))/N) - ((sum((ech^b)*log(ech)))/(sum(ech^b)))
 }
@@ -30,7 +30,7 @@ EMV_SEM=function(x)
   return(list(beta_EMV_SEM=beta.est,eta_EMV_SEM=eta.est))
 }
 
-SEM=function(t,c,beta0=3,eta0=50,epsilon=0.2,iterMax=100)
+SEM=function(t,c,beta0=3,eta0=50,epsilon=0.1,iterMax=20)
 {
   res=c(beta0,eta0) 
   n=length(t)
@@ -49,67 +49,50 @@ SEM=function(t,c,beta0=3,eta0=50,epsilon=0.2,iterMax=100)
     res=rbind(res,c(beta.est,eta.est))
     V=c(V,logVrai(c,eta.est,beta.est,t))
     if (abs(V[i+1]-V[i])<epsilon) {break}
-    if (i==100) {break}
+    if (i==iterMax) {break}
     i=i+1
   }
   return(list(beta_SEM=beta.est,eta_SEM=eta.est,iter=i))
 }
 
 
-#Les donnees
-betaVrai=1.5
+#test convergence
+betaVrai=0.5
 etaVrai=100
 c=40
-n=5000
-tVrai <- rweibull(n,betaVrai,etaVrai)
-tVrai[tVrai>c]=c
+n=seq(from=50,to=1500,length.out=100)
+SEM.est=c()
 
-SEM(tVrai,c)
-
-
-
-#On prend eta0 et beta0 arbitrairement
-eta0=50
-beta0=3
-
-#on stocke la suite des eta_k, beta_k dans une matrice
-res=c(beta0,eta0)
-
-n=length(tVrai)
-m=length(tVrai[tVrai<c])   #nb de deffaillances observees
-
-V=logVrai(c,eta0,beta0,tVrai)
-
-#un simple compteur
-i=1
-Epsilon=0.2
-
-repeat
+for (i in n)
 {
-  #on simule ce qu'on a pas pu observer
-  tVrai[tVrai>=c]=simu(c,eta0,beta0,n-m)
-  #calcul des EMV correspondants
-  beta0=EMV_SEM(tVrai)$beta_EMV_SEM
-  eta0=EMV_SEM(tVrai)$eta_EMV_SEM
-  res=rbind(res,c(beta0,eta0))
-  V=c(V,logVrai(c,eta0,beta0,tVrai))
-  if (abs(V[i+1]-V[i])<Epsilon) {break}
-  if (i==100) {break}
-  i=i+1
+  t <- rweibull(i,betaVrai,etaVrai)
+  t[t>c]=c
+  SEM.est=rbind(SEM.est,c(SEM(t,c)$beta_SEM,SEM(t,c)$eta_SEM))
 }
 
-x=seq(from=1,to=i+1,by=1)
-par(mfrow = c(1,3))
-plot(x,res[,1],xlab="nb iterations",ylab="beta estime")
-abline(h=betaVrai,col="red")
-plot(x,res[,2],xlab="nb iterations",ylab="eta estime")
-abline(h=etaVrai,col="red")
-plot(x,V)
+par(mfrow = c(1,2))
+plot(n,SEM.est[,1],ylab=expression(beta* " estimé"))
+abline(h=betaVrai,col=2)
+plot(n,SEM.est[,2],ylab=expression(eta*" estimé"))
+abline(h=etaVrai,col=2)
 
-
-#a faire : tracer la vraisemblance pour chaque couple (beta_k, eta_k)
-#une fois qu'on aura un crit?re d'arr?t correct, on peut voir la convergence de la m?thode en tracant 
-#en fonction de n les estimations obtenues
-
+  
+#figure 2 - loi des estimateurs
+betaVrai=1.5
+etaVrai=100
+n=500
+c=40
+k=100  #on fait k réalisations 
+SEM.est=matrix(nrow=k,ncol=2) 
+for (i in 1:k)
+{
+  t <- rweibull(n,betaVrai,etaVrai)
+  t[t>c]=c
+  SEM.est[i,1]=SEM(t,c)$beta_SEM
+  SEM.est[i,2]=SEM(t,c)$eta_SEM
+}
+par(mfrow = c(1,2))
+hist(SEM.est[,1],breaks=20,xlab="",main=expression("histogramme pour "*hat(beta)))
+hist(SEM.est[,2],breaks=20,xlab="",main=expression("histogramme pour "*hat(eta)))
 
 

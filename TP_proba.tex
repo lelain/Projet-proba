@@ -17,6 +17,7 @@
 \usepackage{subfigure} %pour des dous-figures
 \usepackage{multicol}
 \usepackage{geometry}
+\usepackage{multirow}
 \geometry{margin=1in} % for example, change the margins to 1 inches all round
 
 \addto\captionsfrench{\renewcommand{\chaptername}{Partie}}
@@ -134,7 +135,7 @@ Pour s'assurer que notre implémentation fonctionne, on peut tester le code pré
     
 \subsection{Convergence}
 
-Le premier est bien sûr la convergence. On vérifie graphiquement que $\hat{\beta}$ et $\hat{\eta}$ obtenus tendent respectivement vers $\beta$ et $\eta$ avec $n$, taille de l'échantillon. (Le code \verb|R| est en annexe).
+Le premier est bien sûr la convergence. On vérifie graphiquement que les $\hat{\beta}$ et $\hat{\eta}$ obtenus tendent respectivement vers $\beta$ et $\eta$ avec $n$, taille de l'échantillon. (Le code \verb|R| est en annexe). On a fait le test ici pour une censure égale à 40, $\beta = 0.5$ et $\eta=100$.
 
  \begin{figure}[!ht]
 	\centering
@@ -151,7 +152,7 @@ Une autre propriété de l'estimateur du maximum de vraisemblance est qu'il est 
 	\centering
      	\includegraphics[scale=0.5]{Rplot2.png}
 
-	\caption{On a choisit $n=500$ et $k=1000$. Cela ressemble bien à une densité normale.}
+	\caption{On a choisit $\beta=1.5$, $\eta=100$, $n=500$ et $k=1000$. Cela ressemble bien à une densité normale.}
 \end{figure}
 
 \subsection{Mise à l'épreuve sur notre problème}
@@ -276,12 +277,49 @@ La fonction \verb|logVrai| renvoie la valeur de la log-vraisemblance d'un échan
 
 Finalement, la fonction \verb|SEM| calcule les estimateurs de $\beta$ et $\eta$ par la méthode SEM. Elle prend en entrée l'échantillon censuré \verb|t| et la censure \verb|c|, ainsi que des paramètres optionnels permettant de jouer sur les valeurs de $\beta_0, \eta_0$ et $\epsilon$. Par sécurité, l'algorithme s'arrête après \verb|iterMax| itérations (100 par défaut).
  \lstinputlisting[firstline=33, lastline=56]{./SEM.R}
-  
+ 
+ \section{Test}
+ 
+ \subsection{Convergence}
+ 
+ Comme nous l'avions fait pour la méthode du maximum de vraisemblance, nous pouvons observer graphiquement la convergence de la méthode SEM. Les graphiques ci-dessous sont réalisés avec une censure égale à 40, $\beta=0.5$ et $\eta=100$.
+ 
+\begin{figure}[!ht]
+	\centering
+     	\includegraphics[scale=0.5]{Rplot3.png}
 
+	\caption{En rouge, on a tracé les vraies valeurs de $\beta$ (à gauche) et $\eta$ (à droite)}
+\end{figure}  
 
+ \subsection{Loi des estimateurs}
+ 
+ On peut se demander si la loi des estimateurs SEM est, comme pour la méthode du maximum de vraisemblance, asymptotiquement normale. 
  
   
-  
+\chapter{Comparaison des deux méthodes}
+
+ On peut à présent comparer les résultats obtenus pour chacune des deux méthodes et voir si la méthode SEM permet de gagner quelque chose par rapport à celle du maximum de vraisemblance. 
+ 
+ On choisit une taille d'échantillon fixe $n=25$ (on avait vu que c'était pour de petits échantillons que la méthode du maximum de vraisemblance pouvait flancher), une censure égale à 40 et $\eta=100$. On réalise les expériences pour 4 valeurs différentes de $\beta$. On simule à chaque fois 50 échantillons sur lesquels on calcule le nombre moyen de défaillances, la moyenne et l'écart-type pour les deux méthodes. Les résultats sont réunis dans le tableau suivant.
+ 
+ \begin{center}
+\begin{tabular}{|c||c||c|c|c|c||c|c|c|c|}
+	\hline
+	\bf \multirow{2}{1.5cm}{Loi de Weibull} & \multirow{2}{1cm}{$\mathbb{E}(M)$} & \multicolumn{4}{c||}{\bf Méthode MV} & \multicolumn{4}{c|}{ \bf Méthode SEM} \\
+
+	\cline{3-10}
+	& & $\mathbb{E}(\hat{\beta})$  &  $Var(\hat{\beta})$ &  $\mathbb{E}(\hat{\eta})$ &  $Var(\hat{\eta})$ & $\mathbb{E}(\hat{\beta})$  &  $Var(\hat{\beta})$ &  $\mathbb{E}(\hat{\eta})$ &  $Var(\hat{\eta})$ \\
+	\hline
+	\bf $\beta=0.5, \eta=100$ & & & & & & & & & \\
+	\hline
+	\bf $\beta=1.2, \eta=100$ & & & & & & & & & \\
+	\hline
+	\bf $\beta=2, \eta=100$ & & & & & & & & & \\
+	\hline
+	\bf $\beta=3, \eta=100$ & &  & &  & & & & & \\
+	\hline
+\end{tabular}
+\end{center}
   
   
   

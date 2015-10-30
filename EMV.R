@@ -14,21 +14,22 @@ EMV=function(t,c)
 }
 
 #figure 1 - convergence
-betaVrai=1.5
+betaVrai=0.5
 etaVrai=100
 c=40
-N=300
-n=rep(0,N)
-EMV.est=matrix(nrow=N,ncol=2)
+n=seq(from=50,to=1500,length.out=100)
+EMV.est=c()
 
-for (i in 1:N)
+for (i in n)
 {
-  n[i]=20+5*i
-  t <- rweibull(n[i],betaVrai,etaVrai)
-  t[t>c]=c
+  repeat
+  {
+    t <- rweibull(i,betaVrai,etaVrai)
+    t[t>c]=c
+    if (length(t[t<c])!=0) {break}  #pour s'assurer de ne pas avoir m=0
+  }
   
-  EMV.est[i,1]=EMV(t,c)$beta_EMV
-  EMV.est[i,2]=EMV(t,c)$eta_EMV
+  EMV.est=rbind(EMV.est,c(EMV(t,c)$beta_EMV,EMV(t,c)$eta_EMV))
 }
 
 par(mfrow = c(1,2))
