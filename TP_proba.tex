@@ -289,7 +289,7 @@ Finalement, la fonction \verb|SEM| calcule les estimateurs de $\beta$ et $\eta$ 
  
  \subsection{Convergence}
  
- Comme nous l'avions fait pour la méthode du maximum de vraisemblance, nous pouvons observer graphiquement la convergence de la méthode SEM. Les graphiques ci-dessous sont réalisés avec une censure égale à 40, $\beta=0.5$ et $\eta=100$ (le code est en annexe \ref{SEM_cv}).
+ Comme nous l'avions fait pour la méthode du maximum de vraisemblance (MV), nous pouvons observer graphiquement la convergence de la méthode SEM. Les graphiques ci-dessous sont réalisés avec une censure égale à 40, $\beta=0.5$ et $\eta=100$ (le code est en annexe \ref{SEM_cv}).
  
 \begin{figure}[!ht]
 	\centering
@@ -313,7 +313,7 @@ Finalement, la fonction \verb|SEM| calcule les estimateurs de $\beta$ et $\eta$ 
 
  On peut à présent comparer les résultats obtenus pour chacune des deux méthodes et voir si la méthode SEM permet de gagner quelque chose par rapport à celle du maximum de vraisemblance. 
  
- On choisit une taille d'échantillon fixe $n=25$ (on avait vu que c'était pour de petits échantillons que la méthode du maximum de vraisemblance (MV) pouvait flancher), une censure égale à 40 et $\eta=100$. On réalise les expériences pour 4 valeurs différentes de $\beta$. On simule à chaque fois 50 échantillons sur lesquels on calcule le nombre moyen de défaillances (noté M), la moyenne et l'écart-type pour les deux méthodes. Les résultats sont réunis dans le tableau suivant (le code est en annexe \ref{comp}).
+ On choisit une taille d'échantillon fixe $n=25$ (on avait vu que c'était pour de petits échantillons que la méthode du maximum de vraisemblance pouvait flancher), une censure égale à 40 et $\eta=100$. On réalise les expériences pour 4 valeurs différentes de $\beta$. On simule à chaque fois 50 échantillons sur lesquels on calcule le nombre moyen de défaillances (noté M), la moyenne et l'écart-type pour les deux méthodes. Les résultats sont réunis dans le tableau suivant (le code est en annexe \ref{comp}).
  
  \begin{center}
 \begin{tabular}{|c||c||c|c|c|c||c|c|c|c|}
@@ -379,7 +379,7 @@ Pour l'estimation de $\beta$, la méthode n'a pas donné ici de résultat specta
 
 L'estimation de $\eta$ a donné lors de notre expérimentation un net avantage pour la méthode SEM. On n'observe pas de tendance à la surestimation comme pour la méthode MV et l'écart-type reste relativement faible. 
 
-On peut, en forme de conclusion, supposer que la méthode SEM, utilisant dans son algorithme une estimation par maximum de vraisemblance (dont on sait qu'elle ne donne pas de très bons résultats dans le cas d'un faible échantillon), pourrait montrer un avantage encore plus tranché sur des échantillons fortement censurés de taille plus importante. 
+On peut, en forme de conclusion, supposer que la méthode SEM, utilisant dans son algorithme une estimation par maximum de vraisemblance (dont on sait qu'elle ne donne pas de très bons résultats dans le cas d'un échantillon de petite taille), pourrait montrer un avantage encore plus tranché sur des échantillons fortement censurés de taille plus importante. 
 
   
  \begin{appendix}
@@ -406,7 +406,7 @@ On peut, en forme de conclusion, supposer que la méthode SEM, utilisant dans so
   
   \chapter{Comparaison des méthodes}
   \label{comp}
-  Le code suivant permet d'obtenir les résultats tels que présentés dans le tableau de synthèse de la partie 4. On suppose que les fonctions \verb|f_beta|, \verb|EMV|, \verb|simu|, \verb|logVrai|, \verb|f_beta_SEM|, \verb|EMV_SEM| et \verb|SEM| sont connues de \verb|R|. À noter que pour $\beta=2$ (et 3 respectivement) il peut être nécessaire de passer, dans les fonctions \verb|EMV| et \verb|EMV_SEM|, le paramètre \verb|upper| de \verb|uniroot| à 20 (respectivement 60, voire 70) pour faire face à l'apparition d'estimations abhérantes pour des échantillons fortement censurés. 
+  Le code suivant permet d'obtenir les résultats tels que présentés dans le tableau de synthèse de la partie 3. On suppose que les fonctions \verb|f_beta|, \verb|EMV|, \verb|simu|, \verb|logVrai|, \verb|f_beta_SEM|, \verb|EMV_SEM| et \verb|SEM| sont connues de \verb|R|. À noter que pour $\beta=2$ (et 3 respectivement) il peut être nécessaire de passer, dans les fonctions \verb|EMV| et \verb|EMV_SEM|, le paramètre \verb|upper| de \verb|uniroot| à 20 (respectivement 60, voire 70) pour faire face à l'apparition d'estimations abhérantes pour des échantillons fortement censurés. 
   
  Ci-dessous, \verb|M| stocke le nombre de défaillances d'un échantillon, \verb|EMV.est| et \verb|SEM.est| les valeurs des estimations par chacune des deux méthodes. Une variable \verb|total_c| compte le nombre d'échantillons totalement censurés, l'instruction \verb|next| permettant de passer, dans ce cas, à l'échantillon suivant sans calcul par MV rendu impossible (on aurait une division par 0). \verb|Res| stocke sous forme de tableau les moyennes et écart-types qui nous intéressent. 
     \lstinputlisting[firstline=70, lastline=99]{./testMethodes.R}
