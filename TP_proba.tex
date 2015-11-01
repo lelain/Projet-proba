@@ -31,11 +31,14 @@
 
 % Début du document
 \begin {document}
+
+
  
 \pagestyle{headings}
  
 \maketitle
  
+ \tableofcontents
 \chapter {Introduction}
 
 On se propose d'étudier la durée de vie d'un matériel. On teste ainsi $n$ matériels identiques et leur durée de vie est modélisée par $n$ variables aléatoires $X_i$ $(1 \le i \le n)$, que l'on supposent indépendantes et indentiquement distribuées. En fixant un temps de censure $c > 0$, on observe des réalisations $T_i = \min (X_i,c)$.
@@ -118,7 +121,7 @@ La fonction de fiabilité $G_{\beta,\eta}$ est donnée, pour $x>0$, par :
      	\end{cases}
 \end{align}
 
-\section{Implémentation}
+\section{Implémentation \label{sec:impl}}
 
 On peut difficilement résoudre ces équations à la main. On va donc d'abord résoudre numériquement l'équation en $\beta$, pour ensuite obtenir $\eta$.
 
@@ -126,7 +129,7 @@ On présente ci-dessous le code \verb|R| correspondant. On définit dans un prem
 
  On peut alors définir la fonction \verb|EMV| qui prend en paramètres l'échantillon $t$ ainsi que la censure $c$. Cette fonction calcule par \verb|uniroot| la racine de notre fonction \verb|f_beta|, on obtient ainsi $\hat{\beta}$ l'estimateur du maximum de vraisemblance pour $\beta$. Celui pour $\eta$ est obtenu en remplaçant $\beta$ par $\hat{\beta}$ dans l'équation (\ref{eqEMV}). 
 
-\lstset{ language=Scilab, frame=single, xrightmargin =1 cm , xleftmargin =1 cm, morekeywords={uniroot}}
+\lstset{language=Scilab, frame=single, xrightmargin =1 cm , xleftmargin =1 cm, morekeywords={uniroot,rweibull,seq,abline,par,rbind,repeat,hist,sd,next}}
 \lstinputlisting[firstline=26, lastline=38]{./TP.R}
      
 \section{Test}
@@ -135,7 +138,7 @@ Pour s'assurer que notre implémentation fonctionne, on peut tester le code pré
     
 \subsection{Convergence}
 
-Le premier est bien sûr la convergence. On vérifie graphiquement que les $\hat{\beta}$ et $\hat{\eta}$ obtenus tendent respectivement vers $\beta$ et $\eta$ avec $n$, taille de l'échantillon. (Le code \verb|R| est en annexe). On a fait le test ici pour une censure égale à 40, $\beta = 0.5$ et $\eta=100$.
+Le premier est bien sûr la convergence. On vérifie graphiquement que les $\hat{\beta}$ et $\hat{\eta}$ obtenus tendent respectivement vers $\beta$ et $\eta$ avec $n$, taille de l'échantillon. (Le code \verb|R| est en annexe \ref{MV_cv}). On a fait le test ici pour une censure égale à 40, $\beta = 0.5$ et $\eta=100$.
 
  \begin{figure}[!ht]
 	\centering
@@ -146,7 +149,7 @@ Le premier est bien sûr la convergence. On vérifie graphiquement que les $\hat
 
 \subsection{Normalité asymptotique}
 
-Une autre propriété de l'estimateur du maximum de vraisemblance est qu'il est asymptotiquement normal. Pour le visualiser, on prend une taille d'échantillon $n$ assez grande et on répète $k$ fois la simulation d'une réalisation d'une loi de Weibull censurée sur laquelle on calcule une estimation du maximum de vraisemblance pour $\beta$ et $\eta$. On trace alors l'histogramme des $\beta_k$ et $\eta_k$ obtenus. 
+Une autre propriété de l'estimateur du maximum de vraisemblance est qu'il est asymptotiquement normal. Pour le visualiser, on prend une taille d'échantillon $n$ assez grande et on répète $k$ fois la simulation d'une réalisation d'une loi de Weibull censurée sur laquelle on calcule une estimation du maximum de vraisemblance pour $\beta$ et $\eta$. On trace alors l'histogramme des $\beta_k$ et $\eta_k$ obtenus (le code est en annexe \ref{MV_norm}). 
 
 \begin{figure}[!ht]
 	\centering
@@ -261,7 +264,7 @@ Une idée est de s'arrêter lorsque la suite s'est stabilisée, c'est-à-dire lo
 Pour $\epsilon$ un réel positif donné. En fait on prendra la log-vraisemblance, simplement pour
 avoir des expressions plus simples.
 
-\section{Implémentation}
+\section{Implémentation \label{sec:impl2}}
 
 Nous avons maintenant tout ce qu'il nous faut. Le code implémentant la méthode SEM décrite dans le paragraphe précédent est détaillé ci-dessous.
 
@@ -282,25 +285,31 @@ Finalement, la fonction \verb|SEM| calcule les estimateurs de $\beta$ et $\eta$ 
  
  \subsection{Convergence}
  
- Comme nous l'avions fait pour la méthode du maximum de vraisemblance, nous pouvons observer graphiquement la convergence de la méthode SEM. Les graphiques ci-dessous sont réalisés avec une censure égale à 40, $\beta=0.5$ et $\eta=100$.
+ Comme nous l'avions fait pour la méthode du maximum de vraisemblance, nous pouvons observer graphiquement la convergence de la méthode SEM. Les graphiques ci-dessous sont réalisés avec une censure égale à 40, $\beta=0.5$ et $\eta=100$ (le code est en annexe \ref{SEM_cv}).
  
 \begin{figure}[!ht]
 	\centering
-     	\includegraphics[scale=0.5]{Rplot3.png}
+     	\includegraphics[scale=0.45]{Rplot3.png}
 
 	\caption{En rouge, on a tracé les vraies valeurs de $\beta$ (à gauche) et $\eta$ (à droite)}
 \end{figure}  
 
  \subsection{Loi des estimateurs}
  
- On peut se demander si la loi des estimateurs SEM est, comme pour la méthode du maximum de vraisemblance, asymptotiquement normale. 
+ On peut se demander si la loi des estimateurs SEM est, comme pour la méthode du maximum de vraisemblance, asymptotiquement normale. Comme pour la méthode MV, on peut tenter de le visualiser avec un histogramme (le code de la figure suivante est en annexe \ref{SEM_norm}). 
  
+ \begin{figure}[!ht]
+	\centering
+     	\includegraphics[scale=0.42]{Rplot4.png}
+
+	\caption{On a choisit $\beta=1.5$, $\eta=100$, $n=500$ et $k=1000$. Cela ressemble fort à une densité normale.}
+\end{figure}
   
 \chapter{Comparaison des deux méthodes}
 
  On peut à présent comparer les résultats obtenus pour chacune des deux méthodes et voir si la méthode SEM permet de gagner quelque chose par rapport à celle du maximum de vraisemblance. 
  
- On choisit une taille d'échantillon fixe $n=25$ (on avait vu que c'était pour de petits échantillons que la méthode du maximum de vraisemblance pouvait flancher), une censure égale à 40 et $\eta=100$. On réalise les expériences pour 4 valeurs différentes de $\beta$. On simule à chaque fois 50 échantillons sur lesquels on calcule le nombre moyen de défaillances, la moyenne et l'écart-type pour les deux méthodes. Les résultats sont réunis dans le tableau suivant.
+ On choisit une taille d'échantillon fixe $n=25$ (on avait vu que c'était pour de petits échantillons que la méthode du maximum de vraisemblance (MV) pouvait flancher), une censure égale à 40 et $\eta=100$. On réalise les expériences pour 4 valeurs différentes de $\beta$. On simule à chaque fois 50 échantillons sur lesquels on calcule le nombre moyen de défaillances, la moyenne et l'écart-type pour les deux méthodes. Les résultats sont réunis dans le tableau suivant (le code est en annexe \ref{comp}).
  
  \begin{center}
 \begin{tabular}{|c||c||c|c|c|c||c|c|c|c|}
@@ -308,23 +317,82 @@ Finalement, la fonction \verb|SEM| calcule les estimateurs de $\beta$ et $\eta$ 
 	\bf \multirow{2}{1.5cm}{Loi de Weibull} & \multirow{2}{1cm}{$\mathbb{E}(M)$} & \multicolumn{4}{c||}{\bf Méthode MV} & \multicolumn{4}{c|}{ \bf Méthode SEM} \\
 
 	\cline{3-10}
-	& & $\mathbb{E}(\hat{\beta})$  &  $Var(\hat{\beta})$ &  $\mathbb{E}(\hat{\eta})$ &  $Var(\hat{\eta})$ & $\mathbb{E}(\hat{\beta})$  &  $Var(\hat{\beta})$ &  $\mathbb{E}(\hat{\eta})$ &  $Var(\hat{\eta})$ \\
+	& & $\mathbb{E}(\hat{\beta})$  &  $\sigma(\hat{\beta})$ &  $\mathbb{E}(\hat{\eta})$ &  $\sigma(\hat{\eta})$ & $\mathbb{E}(\hat{\beta})$  &  $\sigma(\hat{\beta})$ &  $\mathbb{E}(\hat{\eta})$ &  $\sigma(\hat{\eta})$ \\
 	\hline
-	\bf $\beta=0.5, \eta=100$ & & & & & & & & & \\
+	\bf $\beta=0.5, \eta=100$& 11.64 & 0.534 & 0.183 & 152.166 & 211.419 & 0.599 & 0.227 & 122.997& 110.503 \\
 	\hline
-	\bf $\beta=1.2, \eta=100$ & & & & & & & & & \\
+	\bf $\beta=1.2, \eta=100$ & 6.74 & 1.297 & 0.552& 160.670 & 256.215& 1.707&0.721 &85.576 &31.398 \\
 	\hline
-	\bf $\beta=2, \eta=100$ & & & & & & & & & \\
+	\bf $\beta=2, \eta=100$ &4.06 &2.832 &2.195 &137.148& 167.490& 3.029& 1.274& 80.983&25.759 \\
 	\hline
-	\bf $\beta=3, \eta=100$ & &  & &  & & & & & \\
+	\bf $\beta=3, \eta=100$ &1.48 &7.044  &10.935 & 148.199 &184.798 &5.474 &3.142 &101.287 &46.926 \\
 	\hline
 \end{tabular}
 \end{center}
+
+Voici comment l'on pourrait commenter ces résultats.
+
+\subsubsection*{Défaillances}
+On remarque que le nombre moyen de défaillances diminue avec $\beta$ qui croît. Cela se comprend bien dès que l'on regarde la fonction de fiabilité $G_{\beta,\eta}(c) = \mathbb{P}(X>c) = \exp\left(-\left(\frac{c}{\eta}\right)^{\beta}\right)$, où $X \sim \mathcal{W}(\beta,\eta)$. On a, pour une censure $c=40$, les probabilités suivantes : 
+
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\bf $\beta$ & 0.5 & 1.2 & 2 & 3 \\
+\hline
+\bf $G_{\beta,\eta}(40)$ &0.53 & 0.72 &0.85 &0.94\\
+\hline 
+ \end{tabular}
+ \end{center}
   
+On aura donc une forte probabilité d'avoir des échantillons très fortement censurés dans les cas $\beta=2,3$. En effet, dans notre simulation, pour $\beta=3$, on a obtenu 9 échantillons (sur 50) totalement censurés. 
   
+\subsubsection*{Méthode MV}
+
+On remarque que l'estimateur du maximum de vraisemblance pour $\beta$ donne de bons résultats pour des échantillons relativement peu censurés ($\beta=0.5,1.2$), avec un écart-type petit. Lorsque le taux de censure devient plus élevé, la méthode a tendance à surestimer fortement le paramètre $\beta$. L'écart-type devient quant à lui important. On peut supposer que cela vient du fait de l'apparition d'estimations abhérantes. Pour un  $\beta=3$ théorique, on a par exemple obtenu une estimation à 60.48. 
+
+Pour l'estimation de $\eta$, on observe des résultats toujours moins bons et avec un écart-type chaque fois bien supérieur à celui obtenu par la méthode SEM. On observe le même phénomène de valeurs totalement \emph{à côté}, par exemple, pour $\beta=3$, on a observé une estimation de $\eta$ à 968.08.
+
+De plus, comme signalé plus haut, avec un taux de censure important, des échantillons totalement censurés apparaissent, sur lesquels on ne peut pas utiliser la méthode MV.
+
+\subsubsection*{Méthode SEM}
+
+Pour l'estimation de $\beta$, la méthode n'a pas donné ici de résultat spectaculaire. On a par contre une plus faible variabilité dès que la cesure est très forte. Moins de valeurs abhérantes apparaissent. Pour comparaison, dans le cas $\beta=3$, l'estimation la plus mauvaise observée est 14.69.  
+
+L'estimation de $\eta$ a donné lors de notre expérimentation un net avantage pour la méthode SEM. On n'observe pas de tendance à la surestimation comme pour la méthode MV et l'écart-type reste relativement faible. 
+
+On peut, en forme de conclusion, supposer que la méthode SEM, utilisant dans son algorithme une estimation par maximum de vraisemblance (dont on sait qu'elle ne donne pas de très bons résultats dans le cas d'un faible échantillon), pourrait montrer un avantage encore plus tranché sur des échantillons fortement censurés de taille plus importante. 
+
   
+ \begin{appendix}
+ \chapter{Méthode MV - Convergence}
+ \label{MV_cv}
+ On présente ici le code \verb|R| utilisé pour l'obtention de la figure illustrant la convergence de la méthode du maximum de vraisemblance vers les vrais paramètres. On suppose que les fonctions \verb|f_beta| et \verb|EMV| telles que définies au paragraphe \ref{sec:impl} sont connues de \verb|R|.
+  \lstinputlisting[firstline=17, lastline=38]{./EMV.R}
   
+   \chapter{Méthode MV - Normalité asymptotique}
+ \label{MV_norm}
+ Voici le code \verb|R| utilisé pour l'obtention des histogrammes illustrant la normalité asymptotique des estimateurs du maximum de vraisemblance. On suppose que les fonctions \verb|f_beta| et \verb|EMV| sont connues de \verb|R|.
+  \lstinputlisting[firstline=42, lastline=63]{./EMV.R}
   
+   \chapter{Méthode SEM - Convergence}
+ \label{SEM_cv}
+ On présente ici le code \verb|R| utilisé pour l'obtention de la figure illustrant la convergence de la méthode SEM vers les vrais paramètres. On suppose que les fonctions \verb|simu|, \verb|logVrai|, \verb|f_beta_SEM|, \verb|EMV_SEM| et \verb|SEM| telles que définies au paragraphe \ref{sec:impl2} sont connues de \verb|R|.
+  \lstinputlisting[firstline=61, lastline=78]{./SEM.R}
+  
+   \chapter{Méthode SEM - Normalité asymptotique}
+ \label{SEM_norm}
+ Voici le code \verb|R| utilisé pour l'obtention des histogrammes illustrant la normalité asymptotique des estimateurs obtenus par la méthode SEM. On suppose que les fonctions \verb|simu|, \verb|logVrai|, \verb|f_beta_SEM|, \verb|EMV_SEM| et \verb|SEM| sont connues de \verb|R|.
+  \lstinputlisting[firstline=82, lastline=99]{./SEM.R}
+  
+  \chapter{Comparaison des méthodes}
+  \label{comp}
+  Le code suivant permet d'obtenir les résultats tels que présentés dans le tableau de synthèse de la partie 4. On suppose que les fonctions \verb|f_beta|, \verb|EMV|, \verb|simu|, \verb|logVrai|, \verb|f_beta_SEM|, \verb|EMV_SEM| et \verb|SEM| sont connues de \verb|R|. À noter que pour $\beta=2$ (et 3 respectivement) il peut être nécessaire de passer, dans les fonctions \verb|EMV| et \verb|EMV_SEM|, le paramètre \verb|upper| de \verb|uniroot| à 20 (respectivement 60, voire 70) pour faire face à l'apparition d'estimations abhérantes pour des échantillons fortement censurés. 
+  
+ Ci-dessous, \verb|M| stocke le nombre de défaillances d'un échantillon, \verb|EMV.est| et \verb|SEM.est| les valeurs des estimations par chacune des deux méthodes. Une variable \verb|total_c| compte le nombre d'échantillons totalement censurés, l'instruction \verb|next| permettant de passer, dans ce cas, à l'échantillon suivant sans calcul par MV rendu impossible (on aurait une division par 0). \verb|Res| stocke sous forme de tableau les moyennes et écart-types qui nous intéressent. 
+    \lstinputlisting[firstline=70, lastline=99]{./testMethodes.R}
+    
+  \end{appendix}
 
 
 
