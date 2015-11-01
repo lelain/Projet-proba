@@ -2,14 +2,15 @@
 
 f_beta=function(b,ech,nbdef,censure)
 {
-  1/b + (sum(log(ech[ech<censure])))/nbdef - (sum((ech^b)*log(ech)))/(sum(ech^b))
+  1/b + (sum(log(ech[ech<censure])))/nbdef
+     - (sum((ech^b)*log(ech)))/(sum(ech^b))
 }
 
 EMV=function(t,c)
 {
   m=length(t[t<c])
-  beta.est = uniroot(f_beta,lower=0.001,upper=20,ech=t,nbdef=m,censure=c)$root
-  eta.est = (1/m * sum(t^beta.est))^(1/beta.est)   #si m=0 on a des problèmes!! et cela peut arriver...
+  beta.est=uniroot(f_beta,lower=0.001,upper=10,ech=t,nbdef=m,censure=c)$root
+  eta.est=(1/m * sum(t^beta.est))^(1/beta.est)   
   return(list(beta_EMV=beta.est,eta_EMV=eta.est))
 }
 
@@ -24,7 +25,7 @@ for (i in n)
 {
   repeat
   {
-    t <- rweibull(i,betaVrai,etaVrai)
+    t=rweibull(i,betaVrai,etaVrai)
     t[t>c]=c
     if (length(t[t<c])!=0) {break}  #pour ne pas avoir m=0
   }

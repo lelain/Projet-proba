@@ -26,12 +26,12 @@ EMV_SEM=function(x)
 {
   n=length(x)
   beta.est = uniroot(f_beta_SEM,lower=0.001,
-                         upper=20,ech=x,N=n)$root
+                         upper=10,ech=x,N=n)$root
   eta.est = (1/n * sum(x^beta.est))^(1/beta.est)
   return(list(beta_EMV_SEM=beta.est,eta_EMV_SEM=eta.est))
 }
 
-SEM=function(t,c,beta0=1,eta0=50,epsilon=0.001,iterMax=30)
+SEM=function(t,c,beta0=1,eta0=50,epsilon=0.05,iterMax=30)
 {
   res=c(beta0,eta0) 
   n=length(t)

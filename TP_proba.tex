@@ -38,18 +38,20 @@
  
 \maketitle
  
+ \addcontentsline{toc}{chapter}{Introduction} 
  \tableofcontents
-\chapter {Introduction}
 
-On se propose d'étudier la durée de vie d'un matériel. On teste ainsi $n$ matériels identiques et leur durée de vie est modélisée par $n$ variables aléatoires $X_i$ $(1 \le i \le n)$, que l'on supposent indépendantes et indentiquement distribuées. En fixant un temps de censure $c > 0$, on observe des réalisations $T_i = \min (X_i,c)$.
+\chapter* {Introduction}
 
-On suppose de plus que les durées de vie suivent une loi de Zeibull de paramètre de forme $\beta >0$ et de paramètre d'échelle $\eta >0$
+On se propose d'étudier la durée de vie d'un matériel. On teste ainsi $n$ matériels identiques et leur durée de vie est modélisée par $n$ variables aléatoires $X_i$ $(1 \le i \le n)$, que l'on supposent indépendantes et identiquement distribuées. En fixant un temps de censure $c > 0$, on observe des réalisations $T_i = \min (X_i,c)$.
 
-L'objectif du TP est de mettre en oeuvre deux méthodes : celle du maximum de vraisemblance et la méthode SEM pour l'estimation des deux paramètres $\beta$ et $\eta$ à partir de données censurées.
+On suppose de plus que les durées de vie suivent une loi de Weibull de paramètre de forme $\beta >0$ et de paramètre d'échelle $\eta >0$
+
+L'objectif du TP est de mettre en œuvre deux méthodes : celle du maximum de vraisemblance et la méthode SEM pour l'estimation des deux paramètres $\beta$ et $\eta$ à partir de données censurées.
 
 \subsubsection{1.}
 
-Jetons dans un premier temps un oeil sur les caractéristiques de la loi de Weibull.
+Jetons dans un premier temps un œil sur les caractéristiques de la loi de Weibull.
 
 Sa densité s'écrit : 
 \[f_{\beta,\eta}(x)=\frac{\beta}{\eta} \left(\frac{x}{\eta}\right)^{\beta-1} \exp\left(-\left(\frac{x}{\eta}\right)^{\beta}\right)\]
@@ -62,14 +64,14 @@ La fonction de fiabilité $G_{\beta,\eta}$ est donnée, pour $x>0$, par :
  
  On voit alors immédiatement que :
  
- $\triangleright \; $ si $\beta=1$, $\lambda_{1,\eta}(x)=\frac{1}{\eta}$ et le taux de panne est constant, ce qui ce comprend puisqu'alors les $X_i$ suivent une loi exponentielle de paramètre $1/\eta$.
+ $\triangleright \; $ si $\beta=1$, $\lambda_{1,\eta}(x)=\frac{1}{\eta}$ et le taux de panne est constant, ce qui ce comprend puisque alors les $X_i$ suivent une loi exponentielle de paramètre $1/\eta$.
  
  $\triangleright \; $ si $\beta<1$, le taux de panne décroit.
  
   $\triangleright \; $ si $\beta>1$, le taux de panne croit.
   
   \subsubsection{2.}
-  Notons $M$ le nombre de défaillances effectivement observées. Cette variable aléatoire suit donc une loi binomiale de paramètres $n$ et $p$, où $p$ est la probabilité d'obersver une défaillance, c'est-à-dire $p=\mathbb{P}(X_i<c)=1-G_{\beta,\eta}(c)$. Schématiquement, on a donc $M \sim \mathcal{B}(n,1-G_{\beta,\eta}(c))$.
+  Notons $M$ le nombre de défaillances effectivement observées. Cette variable aléatoire suit donc une loi binomiale de paramètres $n$ et $p$, où $p$ est la probabilité d’observer une défaillance, c'est-à-dire $p=\mathbb{P}(X_i<c)=1-G_{\beta,\eta}(c)$. Schématiquement, on a donc $M \sim \mathcal{B}(n,1-G_{\beta,\eta}(c))$.
   
   On peut alors calculer simplement l'espérance de cette loi :
   \[\mathbb{E}(M)=n(1-G_{\beta,\eta}(c))\]
@@ -79,9 +81,9 @@ La fonction de fiabilité $G_{\beta,\eta}$ est donnée, pour $x>0$, par :
   
     \section{Analytiquement \label{sec:calculEMV}}
     
-    On s'intéresse à présent à la première méthode que nous souhaitons mettre en oeuvre : celle du maximum de vraisemblance. Pour cela, il nous faut chercher les estimateurs du maximum de vraisemblance.
+    On s'intéresse à présent à la première méthode que nous souhaitons mettre en œuvre : celle du maximum de vraisemblance. Pour cela, il nous faut chercher les estimateurs du maximum de vraisemblance.
     
-    Pour un échantillon $(t_1,...,t_n)$, la vraisemblance s'écrit :
+    Pour un échantillon $(t_1,...,t_n)$ censuré à une censure $c$, la vraisemblance s'écrit :
     
     \begin{align*}
 	L(t_1,...,t_n;\beta,\eta) & = \prod_{i:t_i<c} {f_{\beta,\eta}(t_i)}  \prod_{i:t_i=c} {G_{\beta,\eta}(t_i)} \\
@@ -89,7 +91,7 @@ La fonction de fiabilité $G_{\beta,\eta}$ est donnée, pour $x>0$, par :
 	& = \prod_{i:t_i<c}{\frac{\beta}{\eta} \left(\frac{t_i}{\eta}\right)^{\beta-1} }  \prod_{i=1}^{n} {\exp\left(-\left(\frac{t_i}{\eta}\right)^{\beta}\right)}
 	\end{align*}
 	
-	D'où :
+	D'où, avec $m= \# \{t_i | t_i<c\}$  :
 	\begin{align*}
 	\log L(t_1,...,t_n;\beta,\eta) & = m \log \beta - m\log \eta + (\beta-1)\sum_{i:t_i<c}{\log t_i} - m(\beta-1)\log \eta - \frac{1}{\eta^\beta} \sum_{i=1}^{n} {t_i^\beta}
      \end{align*}
@@ -116,7 +118,7 @@ La fonction de fiabilité $G_{\beta,\eta}$ est donnée, pour $x>0$, par :
      	 \nonumber\\
      	&\iff
    	\begin{cases}
-     		\eta^{\beta} = \frac{1}{m}  \sum_{i=1}^{n} {t_i^\beta} \label{eqEMV}\\
+     		\eta = \left( \frac{1}{m}  \sum_{i=1}^{n} {t_i^\beta} \right)^\frac{1}{\beta} \label{eqEMV}\\
 		\frac{1}{\beta} + \frac{1}{m} \sum_{i:t_i<c}{\log (t_i)} - \frac{\sum_{i=1}^{n}  {\log (t_i)} t_i^{\beta}}{\sum_{i=1}^{n} {t_i^{\beta}}}  = 0 
      	\end{cases}
 \end{align}
@@ -125,12 +127,14 @@ La fonction de fiabilité $G_{\beta,\eta}$ est donnée, pour $x>0$, par :
 
 On peut difficilement résoudre ces équations à la main. On va donc d'abord résoudre numériquement l'équation en $\beta$, pour ensuite obtenir $\eta$.
 
-On présente ci-dessous le code \verb|R| correspondant. On définit dans un premier temps une fonction \verb|f_beta| qui n'est autre que la fonction pour laquelle on souhaite obtenir la racine. Cette fonction prend en paramètres, en plus de la variable $\beta$, l'échantillon observé censuré $t$, la censure $c$, ainsi que le nombre $m$ de défaillances.
+On présente ci-dessous le code \verb|R| correspondant. On définit dans un premier temps une fonction \verb|f_beta| qui n'est autre que la fonction pour laquelle on souhaite obtenir la racine. Cette fonction prend en paramètres, en plus de la variable $\beta$, noté \verb|b|, l'échantillon observé censuré \verb|ech|, la censure, ainsi que le nombre \verb|nbdef| de défaillances.
 
- On peut alors définir la fonction \verb|EMV| qui prend en paramètres l'échantillon $t$ ainsi que la censure $c$. Cette fonction calcule par \verb|uniroot| la racine de notre fonction \verb|f_beta|, on obtient ainsi $\hat{\beta}$ l'estimateur du maximum de vraisemblance pour $\beta$. Celui pour $\eta$ est obtenu en remplaçant $\beta$ par $\hat{\beta}$ dans l'équation (\ref{eqEMV}). 
+ On peut alors définir la fonction \verb|EMV| qui prend en paramètres l'échantillon \verb|t| ainsi que la censure \verb|c|. Cette fonction calcule par \verb|uniroot| la racine de notre fonction \verb|f_beta|, on obtient ainsi $\hat{\beta}$ l'estimateur du maximum de vraisemblance pour $\beta$. Celui pour $\eta$ est obtenu en remplaçant $\beta$ par $\hat{\beta}$ dans l'équation (\ref{eqEMV}). 
 
-\lstset{language=Scilab, frame=single, xrightmargin =1 cm , xleftmargin =1 cm, morekeywords={uniroot,rweibull,seq,abline,par,rbind,repeat,hist,sd,next}}
-\lstinputlisting[firstline=26, lastline=38]{./TP.R}
+\lstset{language=Scilab, frame=single, xrightmargin =0cm , xleftmargin =0 cm, morekeywords={uniroot,rweibull,seq,abline,par,rbind,repeat,hist,sd,next}}
+\lstinputlisting[firstline=3, lastline=15]{./EMV.R}
+
+ Remarque importante : lorsque l'échantillon $t$ est totalement censuré, on a $m=0$ et une division par zéro dans la fonction \verb|EMV|. On ne peut donc pas faire tourner la méthode dans ce cas et il faudra gérer cela à l'utilisation.
      
 \section{Test}
 
@@ -186,7 +190,7 @@ Cela nous incline à chercher une autre méthode prenant mieux en compte le manq
   
   \section{Analytiquement}
   
-  L'idée est de palier au manque d'information lié à la censure en simulant ces données manquantes, sachant que la défaillance à lieu après la censure. Partant de paramètres $\beta_0$ et $\eta_0$ arbitraires, nous simulerons les données manquantes suivant une loi de Weibull de paramètres $(\beta_0,\eta_0)$ conditionnée par l'évènement ${X_i >c}$. Sur ces données complétées, nous pouvons calculer une estimation $(\beta_1,\eta_1)$ des paramètres par la méthode du maximum de vraisemblance. On répète ceci $k$ fois. On peut montrer que la suite $(\beta_k, \eta_k)$ tend avec $n$ (et non avec $k$, ce serait trop beau...) vers les vrais paramètres $(\beta,\eta)$.
+  L'idée est de palier au manque d'information lié à la censure en simulant ces données manquantes, sachant que la défaillance a lieu après la censure. Partant de paramètres $\beta_0$ et $\eta_0$ arbitraires, nous simulerons les données manquantes suivant une loi de Weibull de paramètres $(\beta_0,\eta_0)$ conditionnée par l’événement ${X_i >c}$. Sur ces données complétées, nous pouvons calculer une estimation $(\beta_1,\eta_1)$ des paramètres par la méthode du maximum de vraisemblance. On répète ceci $k$ fois. On peut montrer que la suite $(\beta_k, \eta_k)$ tend avec $n$ (et non avec $k$) vers les vrais paramètres $(\beta,\eta)$.
   
   \subsection{Simulation}
   
@@ -272,14 +276,14 @@ La fonction \verb|simu| simule \verb|N| valeurs suivant une loi de Weibull de pa
 
 \lstinputlisting[firstline=4, lastline=8]{./SEM.R}
 
-Les fonctions \verb|f_beta_SEM| et \verb|EMV_SEM| calcul l'estimateur du maximum de vraisemblance pour les paramètres $(\beta,\eta)$ d'une loi de Weibull non tronquée. 
-\lstinputlisting[firstline=19, lastline=31]{./SEM.R}
+Les fonctions \verb|f_beta_SEM| et \verb|EMV_SEM| calculent l'estimateur du maximum de vraisemblance pour les paramètres $(\beta,\eta)$ d'une loi de Weibull non tronquée. 
+\lstinputlisting[firstline=20, lastline=32]{./SEM.R}
 
 La fonction \verb|logVrai| renvoie la valeur de la log-vraisemblance d'un échantillon suivant une loi de Weibull de paramètres \verb|beta| et \verb|eta| censurée à \verb|c|.
-\lstinputlisting[firstline=11, lastline=16]{./SEM.R}
+\lstinputlisting[firstline=12, lastline=17]{./SEM.R}
 
-Finalement, la fonction \verb|SEM| calcule les estimateurs de $\beta$ et $\eta$ par la méthode SEM. Elle prend en entrée l'échantillon censuré \verb|t| et la censure \verb|c|, ainsi que des paramètres optionnels permettant de jouer sur les valeurs de $\beta_0, \eta_0$ et $\epsilon$. Par sécurité, l'algorithme s'arrête après \verb|iterMax| itérations (100 par défaut).
- \lstinputlisting[firstline=33, lastline=56]{./SEM.R}
+Finalement, la fonction \verb|SEM| calcule les estimateurs de $\beta$ et $\eta$ par la méthode SEM. Elle prend en entrée l'échantillon censuré \verb|t| et la censure \verb|c|, ainsi que des paramètres optionnels permettant de jouer sur les valeurs de $\beta_0, \eta_0$ et $\epsilon$. Par sécurité, l'algorithme s'arrête après \verb|iterMax| itérations (30 par défaut).
+ \lstinputlisting[firstline=34, lastline=57]{./SEM.R}
  
  \section{Test}
  
@@ -309,7 +313,7 @@ Finalement, la fonction \verb|SEM| calcule les estimateurs de $\beta$ et $\eta$ 
 
  On peut à présent comparer les résultats obtenus pour chacune des deux méthodes et voir si la méthode SEM permet de gagner quelque chose par rapport à celle du maximum de vraisemblance. 
  
- On choisit une taille d'échantillon fixe $n=25$ (on avait vu que c'était pour de petits échantillons que la méthode du maximum de vraisemblance (MV) pouvait flancher), une censure égale à 40 et $\eta=100$. On réalise les expériences pour 4 valeurs différentes de $\beta$. On simule à chaque fois 50 échantillons sur lesquels on calcule le nombre moyen de défaillances, la moyenne et l'écart-type pour les deux méthodes. Les résultats sont réunis dans le tableau suivant (le code est en annexe \ref{comp}).
+ On choisit une taille d'échantillon fixe $n=25$ (on avait vu que c'était pour de petits échantillons que la méthode du maximum de vraisemblance (MV) pouvait flancher), une censure égale à 40 et $\eta=100$. On réalise les expériences pour 4 valeurs différentes de $\beta$. On simule à chaque fois 50 échantillons sur lesquels on calcule le nombre moyen de défaillances (noté M), la moyenne et l'écart-type pour les deux méthodes. Les résultats sont réunis dans le tableau suivant (le code est en annexe \ref{comp}).
  
  \begin{center}
 \begin{tabular}{|c||c||c|c|c|c||c|c|c|c|}
@@ -333,7 +337,7 @@ Finalement, la fonction \verb|SEM| calcule les estimateurs de $\beta$ et $\eta$ 
 Voici comment l'on pourrait commenter ces résultats.
 
 \subsubsection*{Défaillances}
-On remarque que le nombre moyen de défaillances diminue avec $\beta$ qui croît. Cela se comprend bien dès que l'on regarde la fonction de fiabilité $G_{\beta,\eta}(c) = \mathbb{P}(X>c) = \exp\left(-\left(\frac{c}{\eta}\right)^{\beta}\right)$, où $X \sim \mathcal{W}(\beta,\eta)$. On a, pour une censure $c=40$, les probabilités suivantes : 
+On remarque que le nombre moyen de défaillances diminue avec $\beta$ qui croît. Cela se comprend bien dès que l'on regarde la fonction de fiabilité $G_{\beta,\eta}(c) = \mathbb{P}(X>c) = \exp\left(-\left(\frac{c}{\eta}\right)^{\beta}\right)$, où $X \sim Weibull(\beta,\eta)$. On a, pour une censure $c=40$, les probabilités suivantes : 
 
 \begin{center}
 \begin{tabular}{|c|c|c|c|c|}
@@ -346,10 +350,24 @@ On remarque que le nombre moyen de défaillances diminue avec $\beta$ qui croît
  \end{center}
   
 On aura donc une forte probabilité d'avoir des échantillons très fortement censurés dans les cas $\beta=2,3$. En effet, dans notre simulation, pour $\beta=3$, on a obtenu 9 échantillons (sur 50) totalement censurés. 
+
+Plus précisément, on se souvient (voir l'introduction de ce rapport) que $M$, pris comme une variable aléatoire représentant le nombre de défaillances observées, suit une loi binomiale de paramètre $n$ et $1-G_{\beta,\eta}(c)$. On avait donc   $\mathbb{E}(M)=n(1-G_{\beta,\eta}(c))$. On a alors les valeurs théoriques : 
+
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\bf $\beta$ & 0.5 & 1.2 & 2 & 3 \\
+\hline
+\bf $n (1- G_{\beta,\eta}(40))$ &11.72 & 7.08 & 3.70 & 1.55\\
+\hline 
+ \end{tabular}
+ \end{center}
+ 
+ Ces valeurs sont bien proches de celles obtenues expérimentalement.
   
 \subsubsection*{Méthode MV}
 
-On remarque que l'estimateur du maximum de vraisemblance pour $\beta$ donne de bons résultats pour des échantillons relativement peu censurés ($\beta=0.5,1.2$), avec un écart-type petit. Lorsque le taux de censure devient plus élevé, la méthode a tendance à surestimer fortement le paramètre $\beta$. L'écart-type devient quant à lui important. On peut supposer que cela vient du fait de l'apparition d'estimations abhérantes. Pour un  $\beta=3$ théorique, on a par exemple obtenu une estimation à 60.48. 
+On remarque que l'estimateur du maximum de vraisemblance pour $\beta$ donne de bons résultats pour des échantillons relativement peu censurés ($\beta=0.5,1.2$), avec un écart-type petit. Lorsque le taux de censure devient plus élevé, la méthode a tendance à surestimer fortement le paramètre $\beta$. L'écart-type devient quant à lui important. On peut supposer que cela vient du fait de l'apparition d'estimations aberrantes. Pour un  $\beta=3$ théorique, on a par exemple obtenu une estimation à 60.48. 
 
 Pour l'estimation de $\eta$, on observe des résultats toujours moins bons et avec un écart-type chaque fois bien supérieur à celui obtenu par la méthode SEM. On observe le même phénomène de valeurs totalement \emph{à côté}, par exemple, pour $\beta=3$, on a observé une estimation de $\eta$ à 968.08.
 
@@ -357,7 +375,7 @@ De plus, comme signalé plus haut, avec un taux de censure important, des échan
 
 \subsubsection*{Méthode SEM}
 
-Pour l'estimation de $\beta$, la méthode n'a pas donné ici de résultat spectaculaire. On a par contre une plus faible variabilité dès que la cesure est très forte. Moins de valeurs abhérantes apparaissent. Pour comparaison, dans le cas $\beta=3$, l'estimation la plus mauvaise observée est 14.69.  
+Pour l'estimation de $\beta$, la méthode n'a pas donné ici de résultat spectaculaire. On a par contre une plus faible variabilité dès que la censure est très forte. Moins de valeurs aberrantes apparaissent. Pour comparaison, dans le cas $\beta=3$, l'estimation la plus mauvaise observée est 14.69.  
 
 L'estimation de $\eta$ a donné lors de notre expérimentation un net avantage pour la méthode SEM. On n'observe pas de tendance à la surestimation comme pour la méthode MV et l'écart-type reste relativement faible. 
 
@@ -368,12 +386,13 @@ On peut, en forme de conclusion, supposer que la méthode SEM, utilisant dans so
  \chapter{Méthode MV - Convergence}
  \label{MV_cv}
  On présente ici le code \verb|R| utilisé pour l'obtention de la figure illustrant la convergence de la méthode du maximum de vraisemblance vers les vrais paramètres. On suppose que les fonctions \verb|f_beta| et \verb|EMV| telles que définies au paragraphe \ref{sec:impl} sont connues de \verb|R|.
-  \lstinputlisting[firstline=17, lastline=38]{./EMV.R}
+  \lstinputlisting[firstline=18, lastline=39]{./EMV.R}
   
    \chapter{Méthode MV - Normalité asymptotique}
  \label{MV_norm}
  Voici le code \verb|R| utilisé pour l'obtention des histogrammes illustrant la normalité asymptotique des estimateurs du maximum de vraisemblance. On suppose que les fonctions \verb|f_beta| et \verb|EMV| sont connues de \verb|R|.
-  \lstinputlisting[firstline=42, lastline=63]{./EMV.R}
+  \lstinputlisting[firstline=43, lastline=64]{./EMV.R}
+ 
   
    \chapter{Méthode SEM - Convergence}
  \label{SEM_cv}
@@ -393,22 +412,5 @@ On peut, en forme de conclusion, supposer que la méthode SEM, utilisant dans so
     \lstinputlisting[firstline=70, lastline=99]{./testMethodes.R}
     
   \end{appendix}
-
-
-
-
-  
-  
-  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-
 
 \end{document}

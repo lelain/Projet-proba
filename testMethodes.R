@@ -42,7 +42,7 @@ EMV_SEM=function(x)
   return(list(beta_EMV_SEM=beta.est,eta_EMV_SEM=eta.est))
 }
 
-SEM=function(t,c,beta0=1,eta0=50,epsilon=0.001,iterMax=40)
+SEM=function(t,c,beta0=1,eta0=50,epsilon=0.05,iterMax=40)
 {
   res=c(beta0,eta0) 
   n=length(t)
